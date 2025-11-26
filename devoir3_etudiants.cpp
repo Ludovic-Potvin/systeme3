@@ -81,6 +81,11 @@ int main()
 	std::vector<int>adresseLogique; //Adresses Logiques
 	
 	//Lire le fichier d'adresses à traduire
+  std::ifstream fichier("adresses.txt");
+  int valeur;
+  while (fichier >> valeur) {
+      adresseLogique.push_back(valeur);
+  }
 
 
 	//Traduire l'adresse physique en adresse logique
@@ -100,20 +105,13 @@ int main()
 	//Boucler sur les 1000 adresses
 	for(int i =0; i< adresseLogique.size() ; i++)
 	{
-			
-		//Traduire en bits, EXEMPLE
-		std::bitset<16>A = adresseLogique[i];
-		//EXEMPLE DE SYNTAXE POUR UTILISER LE MASQUE
-		result = r & A;
-		
-		
-		//ETC...
+		int A = adresseLogique[i];
+		int page = r2 & A;
+		int offset = r & A;
 
-		//Vecteurs de page et d'offset
-
-		bits_page.push_back(std::stoi(...,nullptr,2));
-		bits_offset.push_back(std::stoi(...,nullptr,2));
-	}	
+		bits_page.push_back(page);
+		bits_offset.push_back(offset);
+	}
 	
 	
 
@@ -142,7 +140,7 @@ int main()
 		//Construire en bits et traduire en décimal
 		
 		//Obtenir la valeur du byte signé
-		... = fct_SignedByte(bits_page[i],bits_offset[i]);
+		int valeur_bit_signe = fct_SignedByte(bits_page[i],bits_offset[i]);
 	
 	}
 
