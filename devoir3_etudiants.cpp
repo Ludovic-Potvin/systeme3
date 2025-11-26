@@ -26,16 +26,19 @@
 int fct_SignedByte(int page, int offset)
 {
 	//Ouvrir le fichier binaire
+  std::ifstream fichier("simuleDisque.bin", std::ios::binary);
 
-	unsigned int LENGTH = 1; //Le byte signé a une longueur de 1 byte
+	unsigned int LENGTH = 1;
+  char bytes;
 	
-	nomduFichier.seekg(...); //Trouver l'endroit correspondant au byte signé dans le fichier
-	nomduFichier.read(...); //Lire cet emplacement
+	fichier.seekg(page * PAGE_t + offset);
+	fichier.read(&bytes, LENGTH);
 
 	//Fermer le fichier
+  fichier.close();
 
 	//Retourner la valeur du byte signé
-
+  return int(bytes);
 }
 
 ////////////////////////////////////////////////////////////////
