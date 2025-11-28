@@ -15,6 +15,7 @@
 #include <string>
 
 #define PAGE_t 256 //Taille d'une page (256 bytes)
+#define TAILLE_MEMOIRE_PHYSIQUE 256 * PAGE_t
 
 ////////////////////////////////////////////////////////////////
 //Cette fonction retourne la valeur du byte signé
@@ -58,9 +59,15 @@ unsigned createMask(unsigned a, unsigned b)
 	return r;
 }
 
+void chargerPageDansFrame(int page, int frame, char memPhysique[TAILLE_MEMOIRE_PHYSIQUE]) {
+    std::ifstream fichier("simuleDisque.bin", std::ios::binary);
 
+    fichier.seekg(page * PAGE_t);
 
+    fichier.read(&memPhysique[frame * PAGE_t], PAGE_t);
 
+    fichier.close();
+}
 
 //////////////////////
 //////////////////////////////////////////////////////////
@@ -78,7 +85,7 @@ int main()
 	
 	
 	//Initialisation et déclarations
-	int memPhysique[256] = {0}; //Mémoire physique
+	char memPhysique[TAILLE_MEMOIRE_PHYSIQUE] = {0}; //Mémoire physique
 	int adressePhysique[1000] = {0}; //Adresses Physiques
 	int tablePage[256][2]={0}; //Table de page
 	std::vector<int>adresseLogique; //Adresses Logiques
@@ -124,15 +131,14 @@ int main()
 	
 	for(int i=0;i<bits_page.size();i++)
 	{
-			
-			if( tablePage[bits_page[i]][1]  != 1)
-			{
-				std::cout << "Page non-chargée dans la table" << std::endl;
-				//Charger la page 
-						
-				
-				
-			}
+    int indexFrame = 0;
+    if(tablePage[bits_page[i]][1] != 1)
+    {
+      std::cout << "Page non-chargée dans la table" << std::endl;
+      //Charger la page
+      chargerPageDansFrame(i, indexFrame, memPhysique);
+      indexFrame++;
+    }
 	}
 
 	
@@ -141,16 +147,23 @@ int main()
 	for(int i=0;i<bits_page.size();i++)
 	{
 		//Construire en bits et traduire en décimal
+    adressePhysique[i] = (tablePage[bits_page[i]][0] * PAGE_t) + bits_offset[i];
 		
 		//Obtenir la valeur du byte signé
-		int valeur_bit_signe = fct_SignedByte(bits_page[i],bits_offset[i]);
-	
+      int valeur_bit_signe = fct_SignedByte(bits_page[i],bits_offset[i]);
 	}
 
 
 
 	//Ecrire le fichier de sortie
+  std::ofstream out("resultats.txt");
 
+  for (int i = 0; i < 1000; i++) {
+    std::cout << "Virtual address: " << adresseLogique[i]
+              << " Physical address: " << adressePhysique[i]
+              << " Value: " << memPhysique[adressePhysique[i]]
+              << std::endl;
+  }
 
 	
 	return 0;
