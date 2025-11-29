@@ -89,6 +89,7 @@ int main()
 	int adressePhysique[1000] = {0}; //Adresses Physiques
 	int tablePage[256][2]={0}; //Table de page
 	std::vector<int>adresseLogique; //Adresses Logiques
+  int TLB[16] = {};
 	
 	//Lire le fichier d'adresses à traduire
   std::ifstream fichier("addresses.txt");
@@ -123,8 +124,9 @@ int main()
 		bits_offset.push_back(offset);
 	}
 
-	//Table de pages
-	//Une adresse à la fois, vérifier si elle est dans la table de page
+	// Table de pages
+	// Une adresse à la fois, vérifier si elle est dans la table de page
+  // Charger les adressesPhysique
 	
   int indexFrame = 0;
   int pageFaultCount = 0;
@@ -141,13 +143,7 @@ int main()
       tablePage[bits_page[i]][0] = physical_addresse;
       indexFrame++;
     }
-	}
 
-	
-	//Calcul de l'adresse physique
-	for(int i=0;i<bits_page.size();i++)
-	{
-		//Construire en bits et traduire en décimal
     adressePhysique[i] = tablePage[bits_page[i]][0] + bits_offset[i];
 	}
 
