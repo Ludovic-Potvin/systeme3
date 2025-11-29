@@ -6,6 +6,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <iostream>
+#include <memory>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sstream>
@@ -158,10 +159,11 @@ int main()
   std::ofstream out("resultats.txt");
 
   for (int i = 0; i < adresseLogique.size(); i++) {
-    int value = static_cast<signed char>(memPhysique[adressePhysique[i]]);
+    int value = static_cast<char>(memPhysique[adressePhysique[i]]);
     out << "Virtual address: " << adresseLogique[i]
       << " Physical address: " << adressePhysique[i]
       << " Value: " << value
+      << " Value bin: " << std::bitset<8>(memPhysique[adressePhysique[i]])
       << std::endl;
   }
 
