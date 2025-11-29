@@ -122,21 +122,19 @@ int main()
 		bits_page.push_back(page);
 		bits_offset.push_back(offset);
 	}
-	
-	
-      std::cout << " BIG TEST\n";
-      std::cout << bits_page.size() << "\n";
-
 
 	//Table de pages
 	//Une adresse à la fois, vérifier si elle est dans la table de page
 	
   int indexFrame = 0;
+  int pageFaultCount = 0;
 	for(int i=0;i<bits_page.size();i++)
 	{
     if(tablePage[bits_page[i]][1] != 1)
     {
-      std::cout << "Page non-chargée dans la table" << std::endl;
+      std::cout << "Page fault: " << bits_page[i] << " non-chargée dans la table" << std::endl;
+      pageFaultCount++;
+
       //Charger la page
       int physical_addresse = chargerPageDansFrame(bits_page[i], indexFrame, memPhysique);
       tablePage[bits_page[i]][1] = 1;
@@ -159,13 +157,16 @@ int main()
   std::ofstream out("resultats.txt");
 
   for (int i = 0; i < adresseLogique.size(); i++) {
-    int value = static_cast<char>(memPhysique[adressePhysique[i]]);
+    int value = (char)memPhysique[adressePhysique[i]];
     out << "Virtual address: " << adresseLogique[i]
       << " Physical address: " << adressePhysique[i]
       << " Value: " << value
       << " Value bin: " << std::bitset<8>(memPhysique[adressePhysique[i]])
       << std::endl;
   }
+
+  // Display stats
+  std::cout << "Page fault %: " << ((double)pageFaultCount/bits_page.size())*100 << "\n";
 
 	return 0;
 }
