@@ -59,14 +59,17 @@ unsigned createMask(unsigned a, unsigned b)
 	return r;
 }
 
-void chargerPageDansFrame(int page, int frame, char memPhysique[TAILLE_MEMOIRE_PHYSIQUE]) {
+int chargerPageDansFrame(int page, int frame, char memPhysique[TAILLE_MEMOIRE_PHYSIQUE]){
     std::ifstream fichier("simuleDisque.bin", std::ios::binary);
+    int physical_addresse = frame * PAGE_t;
 
     fichier.seekg(page * PAGE_t);
 
-    fichier.read(&memPhysique[frame * PAGE_t], PAGE_t);
+    fichier.read(&memPhysique[physical_addresse], PAGE_t);
 
     fichier.close();
+
+    return physical_addresse;
 }
 
 //////////////////////
@@ -80,10 +83,6 @@ void chargerPageDansFrame(int page, int frame, char memPhysique[TAILLE_MEMOIRE_P
 //////////////////////////////////////////////////////////
 int main()
 {
-	
-	
-	
-	
 	//Initialisation et déclarations
 	char memPhysique[TAILLE_MEMOIRE_PHYSIQUE] = {0}; //Mémoire physique
 	int adressePhysique[1000] = {0}; //Adresses Physiques
@@ -91,10 +90,10 @@ int main()
 	std::vector<int>adresseLogique; //Adresses Logiques
 	
 	//Lire le fichier d'adresses à traduire
-  std::ifstream fichier("adresses.txt");
+  std::ifstream fichier("addresses.txt");
   int valeur;
   while (fichier >> valeur) {
-      adresseLogique.push_back(valeur);
+    adresseLogique.push_back(valeur);
   }
 
 
@@ -116,7 +115,7 @@ int main()
 	for(int i =0; i< adresseLogique.size() ; i++)
 	{
 		int A = adresseLogique[i];
-		int page = r2 & A;
+		int page = (r2 & A) >> 8;
 		int offset = r & A;
 
 		bits_page.push_back(page);
@@ -124,33 +123,33 @@ int main()
 	}
 	
 	
+      std::cout << " BIG TEST\n";
+      std::cout << bits_page.size() << "\n";
 
 
 	//Table de pages
 	//Une adresse à la fois, vérifier si elle est dans la table de page
 	
+  int indexFrame = 0;
 	for(int i=0;i<bits_page.size();i++)
 	{
-    int indexFrame = 0;
     if(tablePage[bits_page[i]][1] != 1)
     {
       std::cout << "Page non-chargée dans la table" << std::endl;
       //Charger la page
-      chargerPageDansFrame(i, indexFrame, memPhysique);
+      int physical_addresse = chargerPageDansFrame(bits_page[i], indexFrame, memPhysique);
+      tablePage[bits_page[i]][1] = 1;
+      tablePage[bits_page[i]][0] = physical_addresse;
       indexFrame++;
     }
 	}
 
 	
-	
 	//Calcul de l'adresse physique
 	for(int i=0;i<bits_page.size();i++)
 	{
 		//Construire en bits et traduire en décimal
-    adressePhysique[i] = (tablePage[bits_page[i]][0] * PAGE_t) + bits_offset[i];
-		
-		//Obtenir la valeur du byte signé
-      int valeur_bit_signe = fct_SignedByte(bits_page[i],bits_offset[i]);
+    adressePhysique[i] = tablePage[bits_page[i]][0] + bits_offset[i];
 	}
 
 
@@ -158,15 +157,14 @@ int main()
 	//Ecrire le fichier de sortie
   std::ofstream out("resultats.txt");
 
-  for (int i = 0; i < 1000; i++) {
-    std::cout << "Virtual address: " << adresseLogique[i]
-              << " Physical address: " << adressePhysique[i]
-              << " Value: " << memPhysique[adressePhysique[i]]
-              << std::endl;
+  for (int i = 0; i < adresseLogique.size(); i++) {
+    int value = static_cast<unsigned char>(memPhysique[adressePhysique[i]]);
+    out << "Virtual address: " << adresseLogique[i]
+      << " Physical address: " << adressePhysique[i]
+      << " Value: " << value
+      << std::endl;
   }
 
-	
 	return 0;
-
 }
 
